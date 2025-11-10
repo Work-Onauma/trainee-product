@@ -1,4 +1,5 @@
 ## Getting Started
+cd trainee-product
 First, run the development server:
 ```bash
 npm run dev

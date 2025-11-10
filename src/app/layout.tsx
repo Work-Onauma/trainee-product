@@ -20,7 +20,7 @@ export default function RootLayout({
           {children}
         </main>
         <footer className="text-center py-6 text-sm text-slate-500 border-t mt-10">
-          © {new Date().getFullYear()} ShopEase — Built with ❤️ & Next.js
+           {new Date().getFullYear()} ShopEase — Built with & Next.js
         </footer>
       </body>
     </html>

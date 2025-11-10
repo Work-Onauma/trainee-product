@@ -14,7 +14,8 @@ export default function ProductsPage() {
 
   const searchParams = useSearchParams();
   const search = searchParams.get("search") || "";
-
+  
+ {/* ดึงข้อมูลจาก API */}
   useEffect(() => {
     Promise.all([
       axios.get("https://fakestoreapi.com/products"),
