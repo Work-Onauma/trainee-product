@@ -18,13 +18,13 @@ export default function Navbar() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // ✅ ดึงค่าจาก URL กลับมาในช่องค้นหา
+  // ดึงค่าจาก URL กลับมาในช่องค้นหา
   useEffect(() => {
     const q = searchParams.get("search");
     if (q) setSearch(q);
   }, [searchParams]);
 
-  // ✅ กด Search แล้วเปลี่ยนหน้าแบบไม่รีโหลด
+  // กด Search แล้วเปลี่ยนหน้าแบบไม่รีโหลด
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (!search.trim()) return;
@@ -35,7 +35,7 @@ export default function Navbar() {
   return (
     <nav className="sticky top-0 z-50 bg-gradient-to-b from-blue-600 via-blue-800 to-indigo-950 shadow-lg">
       <div className="relative container mx-auto flex items-center justify-between px-6 py-4">
-        {/* 🛍️ Left Section: Logo */}
+        {/* Left Section: Logo */}
         <Link
           href="/"
           className={`${poppins.className} text-3xl font-bold text-white tracking-tight hover:opacity-90 transition`}
@@ -43,7 +43,7 @@ export default function Navbar() {
           ShopEase
         </Link>
 
-        {/* 🔍 Center Section: Search bar (Absolute Center) */}
+        {/* Center Section: Search bar (Absolute Center) */}
         <div className="hidden md:block absolute left-1/2 transform -translate-x-1/2">
           <form
             onSubmit={handleSearch}
@@ -70,7 +70,7 @@ export default function Navbar() {
           </form>
         </div>
 
-        {/* ☰ Mobile Menu Button */}
+        {/* Mobile Menu Button */}
         <button
           onClick={() => setOpen(!open)}
           className="md:hidden text-white hover:opacity-80 transition"
@@ -79,10 +79,10 @@ export default function Navbar() {
         </button>
       </div>
 
-    {/* 📱 Mobile Dropdown */}
+    {/* Mobile Dropdown */}
 {open && (
   <div className="md:hidden bg-gradient-to-b from-blue-500 to-indigo-700 border-t border-blue-300/40 shadow-inner animate-fadeIn">
-    {/* 🔍 Mobile Search */}
+    {/* Mobile Search */}
     <div className="flex justify-center px-4 pt-4 pb-3">
       <form
         onSubmit={handleSearch}

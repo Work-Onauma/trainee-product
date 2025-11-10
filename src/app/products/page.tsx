@@ -25,7 +25,7 @@ export default function ProductsPage() {
         setCategories(c.data);
       })
       .catch(() =>
-        setError("❌ Failed to load products. Please check your connection.")
+        setError("Failed to load products. Please check your connection.")
       )
       .finally(() => setLoading(false));
   }, []);
@@ -61,7 +61,7 @@ export default function ProductsPage() {
   return (
     <div>
       <h1 className="text-4xl font-extrabold text-center text-slate-900 dark:text-white mb-6">
-        🛒 Our Products
+         Our Products
         <span className="block mx-auto mt-2 w-24 h-1 bg-blue-600 dark:bg-blue-400 rounded-full"></span>
       </h1>
 
