@@ -1,8 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import axios from "axios";
 import { Star, ShoppingCart } from "lucide-react";
+import { fetchProductById, fetchRelatedProducts } from "@/services/productService";
 
 export default function ProductDetail({ product }: { product: any }) {
   const [related, setRelated] = useState<any[]>([]);
@@ -10,45 +10,38 @@ export default function ProductDetail({ product }: { product: any }) {
   const [adding, setAdding] = useState(false);
   const [reviews, setReviews] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!product?.category) return;
-    Promise.all([
-      axios.get(
-        `https://fakestoreapi.com/products/category/${product.category}`
-      ),
-      axios.get(`https://fakestoreapi.com/products/${product.id}`),
-    ])
-      .then(([relatedRes, detailRes]) => {
-        const filtered = relatedRes.data.filter(
-          (p: any) => p.id !== product.id
-        );
-        setRelated(filtered);
-        setReviews([
-          {
-            name: "Alice",
-            rating: 5,
-            comment: "Very good product! Highly recommend.",
-          },
-          {
-            name: "John",
-            rating: 4,
-            comment: "Nice quality but shipping was slow.",
-          },
-          {
-            name: "Maria",
-            rating: 5,
-            comment: "Perfect fit and beautiful packaging!",
-          },
-          {
-            name: "David",
-            rating: 3,
-            comment: "Average product, okay for the price.",
-          },
+
+    const loadData = async () => {
+      try {
+        const [relatedData, detailData] = await Promise.all([
+          fetchRelatedProducts(product.category, product.id),
+          fetchProductById(product.id),
         ]);
-      })
-      .catch((err) => console.error("Error:", err))
-      .finally(() => setLoading(false));
+
+        setRelated(relatedData);
+
+        // mock รีวิว
+        setReviews([
+          { name: "Alice", rating: 5, comment: "Very good product! Highly recommend." },
+          { name: "John", rating: 4, comment: "Nice quality but shipping was slow." },
+          { name: "Maria", rating: 5, comment: "Perfect fit and beautiful packaging!" },
+          { name: "David", rating: 3, comment: "Average product, okay for the price." },
+        ]);
+
+        setError(null);
+      } catch (err: any) {
+        console.error(err);
+        setError("Failed to load product data. Please try again later.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
   }, [product]);
 
   const handleAddToCart = () => {
@@ -58,11 +51,24 @@ export default function ProductDetail({ product }: { product: any }) {
       const newItem = { ...product, quantity };
       localStorage.setItem("cart", JSON.stringify([...cart, newItem]));
       setAdding(false);
-      alert(" Added to cart successfully!");
+      alert("Added to cart successfully!");
     }, 800);
   };
 
-  if (loading) {
+  if (error)
+    return (
+      <div className="p-10 text-center text-red-600 font-medium">
+        {error}
+        <button
+          onClick={() => window.location.reload()}
+          className="block mx-auto mt-4 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-md transition-all duration-200"
+        >
+          Retry
+        </button>
+      </div>
+    );
+
+  if (loading)
     return (
       <div className="animate-pulse p-10 bg-white rounded-2xl shadow-md space-y-6">
         <div className="h-10 w-1/3 bg-gray-200 rounded"></div>
@@ -73,7 +79,7 @@ export default function ProductDetail({ product }: { product: any }) {
         </div>
       </div>
     );
-  }
+  
 
   const increaseQty = () => setQuantity((prev) => prev + 1);
   const decreaseQty = () => setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
@@ -133,7 +139,7 @@ export default function ProductDetail({ product }: { product: any }) {
 
             <div className="text-slate-600 leading-relaxed text-[15px] mb-8 space-y-2">
               {product.description
-                .split(/(?<=[.!?])\s+/) // แยกประโยคตามจุดหรือ ! หรือ ?
+                .split(/(?<=[.!?])\s+/)
                 .map((sentence: string, index: number) => (
                   <p key={index}>{sentence.trim()}</p>
                 ))}
@@ -141,9 +147,7 @@ export default function ProductDetail({ product }: { product: any }) {
 
             {/* Quantity Selector */}
             <div className="flex items-center gap-4 mb-6">
-              <p className="text-slate-700 font-semibold text-[15px]">
-                Quantity:
-              </p>
+              <p className="text-slate-700 font-semibold text-[15px]">Quantity:</p>
               <div className="flex items-center rounded-lg overflow-hidden border border-gray-300 bg-white shadow-sm">
                 <button
                   onClick={decreaseQty}
@@ -189,7 +193,7 @@ export default function ProductDetail({ product }: { product: any }) {
           </div>
         </div>
 
-        {/* Customer Reviews (เรียงลงแนวตั้งเต็มความกว้าง) */}
+        {/* รีวิว */}
         <div className="mt-10 pt-8 border-t border-gray-200">
           <h2 className="text-2xl font-bold text-slate-800 mb-6 text-left">
             Customer Reviews

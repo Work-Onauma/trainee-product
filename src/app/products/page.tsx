@@ -1,9 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import axios from "axios";
 import ProductCard from "@/components/ProductCard";
 import ProductSkeleton from "@/components/ProductSkeleton";
+import {
+  fetchAllProducts,
+  fetchCategories,
+} from "@/services/productService"; 
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<any[]>([]);
@@ -14,21 +17,27 @@ export default function ProductsPage() {
 
   const searchParams = useSearchParams();
   const search = searchParams.get("search") || "";
-  
- {/* ดึงข้อมูลจาก API */}
+
   useEffect(() => {
-    Promise.all([
-      axios.get("https://fakestoreapi.com/products"),
-      axios.get("https://fakestoreapi.com/products/categories"),
-    ])
-      .then(([p, c]) => {
-        setProducts(p.data);
-        setCategories(c.data);
-      })
-      .catch(() =>
-        setError("Failed to load products. Please check your connection.")
-      )
-      .finally(() => setLoading(false));
+    const loadData = async () => {
+      try {
+        const [productData, categoryData] = await Promise.all([
+          fetchAllProducts(),
+          fetchCategories(),
+        ]);
+
+        setProducts(productData);
+        setCategories(categoryData);
+        setError(null);
+      } catch (err) {
+        console.error(" Error fetching data:", err);
+        setError("Failed to load products. Please check your connection.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
   }, []);
 
   const filtered = products.filter(
@@ -37,6 +46,7 @@ export default function ProductsPage() {
       (selectedCategory === "all" || p.category === selectedCategory)
   );
 
+  // Loading state
   if (loading)
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8 p-8">
@@ -46,6 +56,7 @@ export default function ProductsPage() {
       </div>
     );
 
+  // Error state
   if (error)
     return (
       <div className="text-center mt-20 text-red-600">
@@ -59,10 +70,11 @@ export default function ProductsPage() {
       </div>
     );
 
+  // Success state
   return (
     <div>
       <h1 className="text-4xl font-extrabold text-center text-slate-900 dark:text-white mb-6">
-         Our Products
+        Our Products
         <span className="block mx-auto mt-2 w-24 h-1 bg-blue-600 dark:bg-blue-400 rounded-full"></span>
       </h1>
 
@@ -78,6 +90,7 @@ export default function ProductsPage() {
         >
           All
         </button>
+
         {categories.map((cat) => (
           <button
             key={cat}

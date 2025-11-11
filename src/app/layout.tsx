@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: "ShopEase | Modern Store",
   description: "Beautiful Product Showcase with Next.js & Tailwind",
   icons: {
-    icon: "/favicon.png", // เพิ่ม favicon ที่นี่ (ใช้ไฟล์ใน /public)
+    icon: "/favicon.png", 
   },
 };
 

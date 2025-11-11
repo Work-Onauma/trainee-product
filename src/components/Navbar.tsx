@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { Menu, X, Search } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Poppins } from "next/font/google";
-import axios from "axios";
+import { fetchProductTitles } from "@/services/productService"; 
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -16,7 +16,7 @@ export default function Navbar() {
   const [search, setSearch] = useState("");
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [fadeOut, setFadeOut] = useState(false); //  สำหรับ fade-out
+  const [fadeOut, setFadeOut] = useState(false);
   const [highlightIndex, setHighlightIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement | null>(null);
 
@@ -28,30 +28,37 @@ export default function Navbar() {
     if (q) setSearch(q);
   }, [searchParams]);
 
+  
   useEffect(() => {
-    if (search.trim() === "") {
-      setSuggestions([]);
-      setShowSuggestions(false);
-      router.push("/products");
-      return;
-    }
+    const fetchSuggestions = async () => {
+      try {
+        if (search.trim() === "") {
+          setSuggestions([]);
+          setShowSuggestions(false);
+          router.push("/products");
+          return;
+        }
 
-    axios
-      .get("https://fakestoreapi.com/products")
-      .then((res) => {
-        const filtered = res.data
-          .map((p: any) => p.title)
+        const titles = await fetchProductTitles();
+        const filtered = titles
           .filter((title: string) =>
             title.toLowerCase().includes(search.toLowerCase())
           )
           .slice(0, 5);
+
         setSuggestions(filtered);
         setShowSuggestions(filtered.length > 0);
-      })
-      .catch(() => setSuggestions([]));
-  }, [search]);
+      } catch (error) {
+        console.error("Error fetching suggestions:", error);
+        setSuggestions([]);
+        setShowSuggestions(false);
+      }
+    };
 
-  // เมื่อกด Search หรือ Enter
+    fetchSuggestions();
+  }, [search, router]);
+
+  
   const handleSearch = (e?: React.FormEvent) => {
     e?.preventDefault();
     const term =
@@ -65,12 +72,12 @@ export default function Navbar() {
       setSuggestions([]);
       setHighlightIndex(-1);
       inputRef.current?.blur();
-    }, 200); // 0.2 วินาที
+    }, 200);
 
     router.push(`/products?search=${encodeURIComponent(term)}`);
   };
 
-  // เมื่อคลิก suggestion
+  
   const handleSuggestionClick = (value: string) => {
     setFadeOut(true);
     setTimeout(() => {
@@ -120,7 +127,7 @@ export default function Navbar() {
           ShopEase
         </Link>
 
-        {/* Search bar */}
+        {/* Search Bar */}
         <div className="hidden sm:block absolute left-[55%] lg:left-[52%] xl:left-1/2 transform -translate-x-1/2 transition-all duration-300">
           <div className="relative">
             <form
@@ -158,7 +165,7 @@ export default function Navbar() {
               </button>
             </form>
 
-            {/* Suggestion dropdown */}
+            {/* Suggestion Dropdown */}
             {showSuggestions && suggestions.length > 0 && (
               <div
                 className={`absolute left-0 right-0 bg-white mt-1 rounded-md shadow-lg border border-gray-200 max-h-60 overflow-y-auto transform transition-all duration-200 ${
