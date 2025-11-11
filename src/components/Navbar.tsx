@@ -51,7 +51,7 @@ export default function Navbar() {
       .catch(() => setSuggestions([]));
   }, [search]);
 
-  // gมื่อกด Search หรือ Enter
+  // เมื่อกด Search หรือ Enter
   const handleSearch = (e?: React.FormEvent) => {
     e?.preventDefault();
     const term =
